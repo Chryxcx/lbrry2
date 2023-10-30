@@ -1,0 +1,67 @@
+{% extends "base.html" %} {% block title %}Inventory{% endblock %}
+
+{% block content %}
+<form id="inventory-form">
+    <div class="select-box" style="width:10%">
+        <label for="shelf_id"> Shelf: </label>
+        <select class="form-select" id="shelf_id" name="shelf_id">
+            <option class="dropdown-item" value="shelf0" selected>Select shelf</option>
+            <option class="dropdown-item" value="shelf1">1</option>
+            <option class="dropdown-item" value="shelf2">2</option>
+            <option class="dropdown-item" value="shelf3">3</option>
+            <option class="dropdown-item" value="shelf4">4</option>
+        </select>
+    </div>
+    <div class="select-box" style="width:10%">
+        <label for="catalog"> Category: </label>
+        <select class="form-select" id="catalog" name="catalog" disabled>
+            <option class="dropdown-item" value="all" selected>All</option>
+            <option class="dropdown-item" value="Math">Math</option>
+            <option class="dropdown-item" value="Science">Science</option>
+            <option class="dropdown-item" value="Language">Language</option>
+            <option class="dropdown-item" value="Novel">Novel</option>
+        </select>
+    </div>
+
+    <div>
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="search_query"
+            name="search_query" autocomplete="off">
+    </div>
+
+    <div class="selected-shelf" hidden>
+        <p>Selected Shelf: <span id="selected-shelf-value"></span></p>
+        <p>Selected Category: <span id="selected-category-value"></span></p>
+    </div>
+    <div id="rect4" class="table-responsive-lg">
+        <table class="table table-hover table-sm table-borderless align-middle">
+            <thead>
+                <tr>
+                    <!-- <th scope="col">#</th> -->
+                    <th scope="col">QR Code</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Publisher</th>
+                    <th scope="col">Year</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                {% for qr_code_data in qr_code_data_list %}
+                <tr class="qr-row" data-toggle="modal" data-qr-code="/qr_codes/{{ qr_code_data.qrcode }}">
+                    <td>{{ qr_code_data.qrcode }}</td>
+                    <td>{{ qr_code_data.category }}</td>
+                    <td>{{ qr_code_data.title }}</td>
+                    <td>{{ qr_code_data.publisher }}</td>
+                    <td>{{ qr_code_data.year }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<script type="text/javascript" src="{{ url_for('auth.static', filename='inventory.js') }}">
+   
+</script>
+{% endblock %}
+
+

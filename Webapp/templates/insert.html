@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Insert{% endblock %}
+{% block content %}
+    <form method="POST" action="/insert" id="insert-form">
+        <div class="container" id="rect5">
+            <h1 class="head">Insert a Book</h1>
+            <div class="form-group">
+                <div class="input-group">
+                    <input id="title" type="text" class="input-group__input" name="b_title" autocomplete="off" required/>
+                    <label for="title" class="input-group__label">Title</label>
+                </div>
+                <div class="input-group1">
+                    <input id="year1" type="text" class="input-group__input1" name="b_year" autocomplete="off" required/>
+                    <label for="year1" class="input-group__label1">Year</label>
+                </div>
+                <div class="input-group2">
+                    <input id="publisher" type="text" class="input-group__input2" name="b_publisher" autocomplete="off" required/>
+                    <label for="publisher" class="input-group__label2">Publisher</label>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <p class="shelf">Shelf:</p>
+                <label for="shelves"></label>
+                <select class="form-select" name="b_shelves" id="shelves">
+                    <option value="shelf1">1</option>
+                    <option value="shelf2">2</option>
+                    <option value="shelf3">3</option>
+                    <option value="shelf4">4</option>
+                </select>
+
+                <p class="cats">Catalogue:</p>
+                <label for="cata"></label>
+                <select class="form-select" name="b_cata" id="cata">
+                    <option value="Math">Math</option>
+                    <option value="Science">Science</option>
+                    <option value="Language">Language</option>
+                    <option value="Novel">Novel</option>
+                </select>
+
+            </div>
+            <br/>
+            <button type="submit" class="btn btn-success" >Submit</button>
+            <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="qrModalLabel">QR Code</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="flash-messages">
+                                {% set messages = get_flashed_messages() %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-success" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <img src="" alt="QR Code" id="qrImage">
+                        </div>
+
+                        <input id="SizeInput" name="selected_size"> 
+                        <input type="range" class="form-range" id="qrsize" name="qrsize" min="50" max="800" step="1" value="100"> 
+                        <output for="qrsize" id="sizeValue">100</output>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" id="downloadBtn">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="{{ url_for('auth.static', filename='insert.js') }}">
+        
+    </script>
+{% endblock %}
+
+
+

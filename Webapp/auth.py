@@ -9,9 +9,10 @@ from tkinter import Label
 from PIL import Image, ImageTk
 from io import BytesIO
 import base64
-
 import threading
-streaming = False
+
+
+
 
 
 table_prefixes = {
@@ -124,92 +125,47 @@ def serve_qr_code(image_id):
 
 
 # Flag to control the video streaming thread
+ # Move camera instantiation outside to prevent concurrent access
 streaming = False
-
-# Video capture object
-camera = cv2.VideoCapture(0)
-
-def generate_frames():
-    global streaming
-    while streaming:
-        # Read a frame from the camera
-        ret, frame = camera.read()
-
-        if not ret:
-            break
-
-        # Perform QR code detection
-        decoded_objects = decode(frame)
-
-        for obj in decoded_objects:
-            x, y, w, h = obj.rect
-            qr_data = obj.data.decode('utf-8')
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-
-        if decoded_objects:
-            results_text = "\n".join([obj.data.decode('utf-8') for obj in decoded_objects])
-        else:
-            results_text = "Scanning QR codes..."
-
-        # Convert the frame to JPEG for web display
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame_pil = Image.fromarray(frame)
-        frame_io = BytesIO()
-        frame_pil.save(frame_io, format='JPEG')
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_io.getvalue() + b'\r\n' + results_text.encode() + b'\r\n')
+camera = cv2.VideoCapture(0)  # Initialize the camera when the server starts.
 
 @auth.route('/camera')
-def camera():
+def camera_view():
     return render_template('camera.html')
 
 def generate_frames():
-    global streaming
+    global streaming, camera
 
-    # Video capture object (moved inside the function)
-    camera = cv2.VideoCapture(0)
+    if not camera.isOpened():
+        print("Error: Camera could not be opened.")
+        yield "Error: Camera could not be opened."  # This won't show an image, but it will give a message.
+        return
 
     while streaming:
-        # Read a frame from the camera
         ret, frame = camera.read()
-
         if not ret:
+            print("Error: Frame could not be read.")
             break
 
-        # Perform QR code detection
         decoded_objects = decode(frame)
-
         for obj in decoded_objects:
             x, y, w, h = obj.rect
             qr_data = obj.data.decode('utf-8')
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-        if decoded_objects:
-            results_text = "\n".join([obj.data.decode('utf-8') for obj in decoded_objects])
-        else:
-            results_text = "Scanning QR codes..."
-
-        # Convert the frame to JPEG for web display
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_pil = Image.fromarray(frame)
         frame_io = BytesIO()
         frame_pil.save(frame_io, format='JPEG')
 
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_io.getvalue() + b'\r\n' + results_text.encode() + b'\r\n')
-
-    # Release the camera when streaming is stopped
-    camera.release()
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_io.getvalue() + b'\r\n')
 
 @auth.route('/start_stream')
 def start_stream():
     global streaming
     streaming = True
-    # Start the streaming thread
-    threading.Thread(target=generate_frames).start()
     return "Streaming started"
 
 @auth.route('/stop_stream')
@@ -221,7 +177,6 @@ def stop_stream():
 @auth.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @auth.route('/insert', methods=['GET','POST'])
 def insert():

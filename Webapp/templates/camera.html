@@ -19,83 +19,23 @@
     }
 </style>
 
+
 <h1>QR Code Scanner</h1>
-<video id="qr-video" width="640" height="480" autoplay></video>
-<button class="stream-button" onclick="startStream()">Start Streaming</button>
-<button class="stream-button" onclick="stopStream()">Stop Streaming</button>
-<script src="{{ url_for('auth.static', filename='jsQR.js') }}"></script>
-<script src="{{ url_for('auth.static', filename='main.js') }}"></script>
+<img src="{{ url_for('auth.video_feed') }}" />
+<button id="startStreamButton">Start Stream</button>
+<button id="stopStreamButton">Stop Stream</button>
+
 <script>
-    function startStream() {
-        fetch('/start_stream');
-    }
-
-    function stopStream() {
-        fetch('/stop_stream');
-    }
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const videoElement = document.getElementById("qr-video");
-    const startButton = document.getElementById("start-button");
-    const stopButton = document.getElementById("stop-button");
-    const resultElement = document.getElementById("result");
-
-    let videoStream;
-
-    // Click event handler for the Start Camera button
-    startButton.addEventListener("click", async () => {
-        try {
-            // Get access to the user's camera
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-            // Assign the camera stream to the video element
-            videoElement.srcObject = videoStream;
-
-            // Start the video stream
-            videoElement.play();
-        } catch (error) {
-            console.error("Error accessing the camera: ", error);
-        }
+    document.addEventListener("DOMContentLoaded", function() {
+        // Start stream button event
+        document.querySelector("#startStreamButton").addEventListener("click", function() {
+            location.href = '{{ url_for("auth.start_stream") }}';
+        });
+        
+        // Stop stream button event
+        document.querySelector("#stopStreamButton").addEventListener("click", function() {
+            location.href = '{{ url_for("auth.stop_stream") }}';
+        });
     });
-
-    // Click event handler for the Stop Camera button
-    stopButton.addEventListener("click", () => {
-        // Stop the video stream and release the camera
-        if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-        }
-    });
-
-    // Continuously capture frames and process for QR code detection
-    videoElement.addEventListener("play", function () {
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        const handleFrame = () => {
-            if (videoElement.paused || videoElement.ended) {
-                return;
-            }
-
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-            });
-
-            if (code) {
-                resultElement.innerText = "QR Code Detected: " + code.data;
-            }
-
-            requestAnimationFrame(handleFrame);
-        };
-
-        requestAnimationFrame(handleFrame);
-    });
-});
 </script>
 {% endblock %}
-

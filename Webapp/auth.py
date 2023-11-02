@@ -183,8 +183,8 @@ def insert():
     cursor.execute('SELECT * FROM categories')
     category_name = cursor.fetchall()
     print(category_name)
-    cursor1.execute('SELECT category_id FROM categories')
-    category_id = cursor1.fetchall()
+    cursor1.execute('SELECT * FROM shelves')
+    shelf = cursor1.fetchall()
 
 
     if request.method == "POST":
@@ -308,4 +308,4 @@ def insert():
             flash('Error inserting data into the database', 'error')
             return jsonify({'success': False, 'error': 'Error inserting data into the database'})
 
-    return render_template("insert.html", qr_image_base64=None, category_name=category_name, category_id=category_id)
+    return render_template("insert.html", qr_image_base64=None, category_name=category_name, shelf=shelf)

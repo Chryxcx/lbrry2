@@ -11,22 +11,25 @@
                 </div>
                 <div class="input-group1">
                     <input id="year1" type="text" class="input-group__input1" name="b_year" autocomplete="off" required/>
-                    <label for="year1" class="input-group__label1">Year</label>
+                    <label for="year1" class="input-group__label1">Year Published</label>
                 </div>
                 <div class="input-group2">
                     <input id="publisher" type="text" class="input-group__input2" name="b_publisher" autocomplete="off" required/>
-                    <label for="publisher" class="input-group__label2">Publisher</label>
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label for="publisher" class="input-group__label2">Publisher</label>     
                 </div>
-
+                <div class="input-group3">
+                    <input id="isbn" type="text" class="input-group__input3" name="b_isbn" autocomplete="off" required/>
+                    <label for="isbn" class="input-group__label3">ISBN</label>
+                </div>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             </div>
 
             <div class="form-group">
                 <p class="shelf">Shelf:</p>
                 <label for="shelves"></label>
                 <select size="1"class="form-select" name="b_shelves" id="shelves">
-                    {% for i in category_id %}
-                        <option value="{{i[0]}}">{{i[0]}}</option>
+                    {% for s in shelf %}
+                        <option value="{{s[1]}}">{{s[0]}}</option>
                     {% endfor %}
                 </select>
                 

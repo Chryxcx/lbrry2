@@ -116,3 +116,4 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Update QR code size when the user selects a new size
     qrsize.addEventListener('input', updateQRCodeSize);
 });
+

@@ -13,7 +13,7 @@ def create_app():
     Bootstrap(app)
     app.config['MYSQL_HOST'] = 'localhost'
     app.config['MYSQL_USER'] = 'root'
-    app.config['MYSQL_PASSWORD'] = 'chocolate98'
+    app.config['MYSQL_PASSWORD'] = 'chocolate29'
     app.config['MYSQL_DB'] = 'db_library'
     app.config['STATIC_FOLDER'] = 'path/to/static'
     app.config['SECRET_KEY'] = 'jdfhajksdfjkasdlfjdasklfjklj'

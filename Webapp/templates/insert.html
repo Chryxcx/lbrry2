@@ -24,22 +24,21 @@
             <div class="form-group">
                 <p class="shelf">Shelf:</p>
                 <label for="shelves"></label>
-                <select class="form-select" name="b_shelves" id="shelves">
-                    <option value="shelf1">1</option>
-                    <option value="shelf2">2</option>
-                    <option value="shelf3">3</option>
-                    <option value="shelf4">4</option>
+                <select size="1"class="form-select" name="b_shelves" id="shelves">
+                    {% for i in category_id %}
+                        <option value="{{i[0]}}">{{i[0]}}</option>
+                    {% endfor %}
                 </select>
-
-                <p class="cats">Catalogue:</p>
+                
+                
+                <p class="cats">Category:</p>
                 <label for="cata"></label>
-                <select class="form-select" name="b_cata" id="cata">
-                    <option value="Math">Math</option>
-                    <option value="Science">Science</option>
-                    <option value="Language">Language</option>
-                    <option value="Novel">Novel</option>
+                <select class="form-select" name="b_cate" id="cata">
+                    {% for c in category_name %}
+                        <option value="{{c[1]}}">{{c[1]}}</option>
+                    {% endfor %}
                 </select>
-
+                
             </div>
             <br/>
             <button type="submit" class="btn btn-success" >Submit</button>

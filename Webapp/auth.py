@@ -12,9 +12,6 @@ import base64
 import threading
 
 
-
-
-
 table_prefixes = {
     'shelf1': {'prefix': 'A-', 'counter': 'shelf1_counter'},
     'shelf2': {'prefix': 'B-', 'counter': 'shelf2_counter'},
@@ -180,6 +177,16 @@ def video_feed():
 
 @auth.route('/insert', methods=['GET','POST'])
 def insert():
+    db = current_app.get_db()
+    cursor  = db.cursor()
+    cursor1 = db.cursor()
+    cursor.execute('SELECT * FROM categories')
+    category_name = cursor.fetchall()
+    print(category_name)
+    cursor1.execute('SELECT category_id FROM categories')
+    category_id = cursor1.fetchall()
+
+
     if request.method == "POST":
         db = current_app.get_db()
         cursor = db.cursor()
@@ -301,4 +308,4 @@ def insert():
             flash('Error inserting data into the database', 'error')
             return jsonify({'success': False, 'error': 'Error inserting data into the database'})
 
-    return render_template("insert.html", qr_image_base64=None)
+    return render_template("insert.html", qr_image_base64=None, category_name=category_name, category_id=category_id)

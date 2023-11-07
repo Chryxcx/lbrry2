@@ -39,6 +39,7 @@
                     <!-- <th scope="col">#</th> -->
                     <th scope="col">QR Code</th>
                     <th scope="col">Category</th>
+                    <th scope="col">ISBN</th>
                     <th scope="col">Title</th>
                     <th scope="col">Publisher</th>
                     <th scope="col">Year</th>
@@ -49,9 +50,10 @@
                 <tr class="qr-row" data-toggle="modal" data-qr-code="/qr_codes/{{ qr_code_data.qrcode }}">
                     <td>{{ qr_code_data.qrcode }}</td>
                     <td>{{ qr_code_data.category }}</td>
+                    <td>{{ qr_code_data.isbn }}</td>
                     <td>{{ qr_code_data.title }}</td>
                     <td>{{ qr_code_data.publisher }}</td>
-                    <td>{{ qr_code_data.year }}</td>
+                    <td>{{ qr_code_data.year_published }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

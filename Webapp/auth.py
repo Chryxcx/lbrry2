@@ -154,7 +154,7 @@ def retrieve_data():
             print("Error fetching data from API:", response.text)
             return set()
     except Exception as e:
-        print("Error fetching data from API:", str(e))
+        print("Error fetching data from API:", str(e))  
         return set()
 
 def generate_frames():

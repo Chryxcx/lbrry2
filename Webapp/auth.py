@@ -55,7 +55,7 @@ def inventory():
 
         cursor = db.cursor()
 
-        qr_code_data_list = get_qr_data(cursor)
+        
         
         if category == 'all':
             # Fetch all rows from the selected shelf
@@ -113,8 +113,11 @@ def inventory():
         return jsonify({'error': 'An error occurred during data retrieval'})
        
 def get_qr_data(cursor):
+    db = current_app.get_db()
+    print("Database:", db)
+    shelf = request.args.get('shelf_id')
     try:
-        cursor.execute("SELECT * FROM shelf1")
+        cursor.execute(f"SELECT * FROM {shelf}")
         result = cursor.fetchall()
         qr_values = [row[1] for row in result]  # assuming the QR data is in the second column
         return qr_values  # You can return the list directly unless you specifically need JSON format here
@@ -122,6 +125,18 @@ def get_qr_data(cursor):
         print(f"SQL Error: {err}")
         return []  # Return an empty list in case of an error
 
+
+@auth.route('/shelf1', methods=['GET'])
+def get_qr_data():
+    try:
+        db = current_app.get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM shelf1")
+        result = cursor.fetchall()
+        qr_values = [a[3] for a in result]
+        return jsonify(qr_values)
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)})
 
 @auth.route('/qr_codes/<image_id>')
 def serve_qr_code(image_id):
@@ -134,11 +149,26 @@ def serve_qr_code(image_id):
         return "Image not found", 404
 
 
-
 # Flag to control the video streaming thread
  # Move camera instantiation outside to prevent concurrent access
 streaming = False
-camera = cv2.VideoCapture(0)  # Initialize the camera when the server starts.
+camera = cv2.VideoCapture(0)  # Initialize the camera when the server starts
+lock = threading.Lock()
+
+def initialize_camera():
+    global camera
+    with lock:  # Use lock to avoid race conditions
+        if camera is None or not camera.isOpened():
+            camera = cv2.VideoCapture(0)
+            if not camera.isOpened():
+                raise ValueError("The camera could not be opened")
+
+def release_camera():
+    global camera
+    with lock:  # Use lock to avoid race conditions
+        if camera is not None and camera.isOpened():
+            camera.release()
+
 
 @auth.route('/camera')
 def camera_view():
@@ -146,7 +176,7 @@ def camera_view():
 
 def retrieve_data():
     try:
-        response = requests.get("/inventory")
+        response = requests.get("http://127.0.0.1:5000/shelf1")
         if response.status_code == 200:
             qr_values = response.json()
             return set(qr_values)
@@ -154,36 +184,34 @@ def retrieve_data():
             print("Error fetching data from API:", response.text)
             return set()
     except Exception as e:
-        print("Error fetching data from API:", str(e))  
+        print("Error fetching data from API:", str(e))
         return set()
 
 def generate_frames():
     global streaming, camera
 
-    if not camera.isOpened():
-        print("Error: Camera could not be opened.")
-        yield "Error: Camera could not be opened."  # This won't show an image, but it will give a message.
-        return
-
     while streaming:
+        initialize_camera()
+
         ret, frame = camera.read()
         if not ret:
             print("Error: Frame could not be read.")
             break
-        
-        qr_values_from_api = retrieve_data()
 
+        qr_values = retrieve_data()
+        
         decoded_objects = decode(frame)
         for obj in decoded_objects:
             x, y, w, h = obj.rect
             qr_data = obj.data.decode('utf-8')
-
-            if qr_data in qr_values_from_api:
-                color = (0, 255, 0)  # Green for QR codes that are in inventory
+            if qr_data in qr_values:
+                color = (0, 255, 0)  # Green for QR codes that are in the inventory
             else:
                 color = (0, 0, 255)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+
+            cv2.rectangle(frame, (x, y), (x + w, y + h),color, 2)
+            cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8,color, 2)
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_pil = Image.fromarray(frame)
@@ -196,19 +224,19 @@ def generate_frames():
 @auth.route('/start_stream')
 def start_stream():
     global streaming
-    streaming = True
-    return "Streaming started"
+    try:
+        streaming = True
+        initialize_camera()  # Try to initialize the camera
+        return "Streaming started"
+    except ValueError as e:
+        streaming = False
+        return str(e), 500
 
 @auth.route('/stop_stream')
 def stop_stream():
     global streaming
     streaming = False
-
-    time.sleep(0.1)
-
-    if camera.isOpened():
-        camera.release()
-    
+    release_camera()
     return "Streaming stopped"
 
 @auth.route('/video_feed')

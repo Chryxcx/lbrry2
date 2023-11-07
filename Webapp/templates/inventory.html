@@ -47,7 +47,7 @@
             </thead>
             <tbody id="table-body">
                 {% for qr_code_data in qr_code_data_list %}
-                <tr class="qr-row" data-toggle="modal" data-qr-code="/qr_codes/{{ qr_code_data.qrcode }}">
+                <tr class="qr-row"  data-qr-code="/qr_codes/{{ qr_code_data.qrcode }}">
                     <td>{{ qr_code_data.qrcode }}</td>
                     <td>{{ qr_code_data.category }}</td>
                     <td>{{ qr_code_data.isbn }}</td>
